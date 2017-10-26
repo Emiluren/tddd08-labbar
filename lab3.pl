@@ -1,3 +1,4 @@
+
 [scanner]. % for scan
 [lab2]. % for execute
 
@@ -11,54 +12,24 @@ run(In, String, Out) :-
 
 % parse(Tokens, AbstStx)
 % AbstStx is the abstract syntax tree for the token list Tokens
-parse(Tokens, AbstStx) :- parse_cmd(Tokens, AbstStx).
-parse(Tokens, seq(AbstStxCmd, AbstStxPgm)) :-
-    append(Cmd, [; | Pgm], Tokens),
-    parse_cmd(Cmd, AbstStxCmd),
-    parse(Pgm, AbstStxPgm).
+parse(Tokens, AbstStx) :- program(AbstStx, Tokens, []).
 
-% concat(Xs, Ys)
-% Xs is a list of lists and Ys is all those lists appended in order
-concat([], []).
-concat([X|Xs], Y) :- append(X, XTail, Y), concat(Xs, XTail).
+program(Cmd) --> command(Cmd).
+program(seq(Cmd, Pgm)) --> command(Cmd), [;], program(Pgm).
 
-% parse_cmd(Tokens, AbstStx)
-% AbstStx is the abstract syntax tree for the command represented by the token
-% list Tokens
-parse_cmd([skip], skip).
-parse_cmd([Id, := | Expr], set(Id, ExprAbstStx)) :-
-    parse_expr(Expr, ExprAbstStx).
-parse_cmd(Tokens, if(BoolAbstStx, PgmThenAbstStx, PgmElseAbstStx)) :-
-    concat([[if], Bool, [then], PgmThen, [else], PgmElse, [fi]], Tokens),
-    parse_bool(Bool, BoolAbstStx),
-    parse(PgmThen, PgmThenAbstStx),
-    parse(PgmElse, PgmElseAbstStx).
-parse_cmd(Tokens, while(BoolAbstStx, PgmAbstStx)) :-
-    concat([[while], Bool, [do], Pgm, [od]], Tokens),
-    parse_bool(Bool, BoolAbstStx),
-    parse(Pgm, PgmAbstStx).
+command(skip) --> [skip].
+command(set(id(I), Exp)) --> [id(I), :=], expr(Exp).
+command(if(Bool, PgmThen, PgmElse)) -->
+    [if], bool(Bool), [then], program(PgmThen), [else], program(PgmElse), [fi].
+command(while(Bool, Pgm)) --> [while], bool(Bool), [do], program(Pgm), [od].
 
-% parse_bool(Tokens, AbstStx)
-% AbstStx is the abstract syntax tree for the boolean expression represented by
-% the token list Tokens
-parse_bool(Tokens, EStx1 > EStx2) :-
-    concat([E1, [>], E2], Tokens),
-    parse_expr(E1, EStx1),
-    parse_expr(E2, EStx2).
+bool(Exp1 > Exp2) --> expr(Exp1), [>], expr(Exp2).
 
-parse_expr(Tokens, FStx * EStx) :-
-    concat([F, [*], E], Tokens),
-    parse_factor(F, FStx),
-    parse_expr(E, EStx).
-parse_expr(Tokens, FStx) :-
-    parse_factor(Tokens, FStx).
+expr(Factor * Expr) --> factor(Factor), [*], expr(Expr).
+expr(Factor) --> factor(Factor).
 
-parse_factor(Tokens, TStx + FStx) :-
-    concat([T, [+], F], Tokens),
-    parse_term(T, TStx),
-    parse_factor(F, FStx).
-parse_factor(Tokens, TStx) :-
-    parse_term(Tokens, TStx).
+factor(Term + Factor) --> term(Term), [+], factor(Factor).
+factor(Factor) --> term(Factor).
 
-parse_term([id(X)], id(X)).
-parse_term([num(X)], num(X)).
+term(id(X)) --> [id(X)].
+term(num(X)) --> [num(X)].

@@ -1,0 +1,78 @@
+% 2.2
+% First alternative
+middle(X, [X]).
+middle(X, [_First|Xs]) :-
+    append(Middle, [_Last], Xs),
+    middle(X, Middle).
+
+?- middle(X, [a,b,c]).
+X = b ;
+false.
+
+?- middle(a, X).
+X = [a] ;
+X = [_67089842, a, _67089848] ;
+X = [_67089842, _67089854, a, _67089878, _67089848] ;
+X = [_67089842, _67089854, _67089866, a, _67089890, _67089902, _67089848] ;
+X = [_67089842, _67089854, _67089866, _67089878, a, _67089902, _67089914, _67089926, _67089848] .
+
+% Finds all answers. This is obviously ideal for all queries.
+
+% Second alternative
+middle(X, [_First|Xs]) :-
+    append(Middle, [_Last], Xs),
+    middle(X, Middle).
+middle(X, [X]).
+
+?- middle(X, [a,b,c]).
+X = b ;
+false.
+
+?- middle(a, X).
+X = [_7266, a, _7272] ;
+X = [_7266, _7278, a, _7302, _7272] ;
+X = [_7266, _7278, _7290, a, _7314, _7326, _7272] ;
+X = [_7266, _7278, _7290, _7302, a, _7326, _7338, _7350, _7272] 
+
+% This one does not find the list [a] for middle(a, X) because the branch of the
+% SLD that would find it is not prioritized and the other branch already has an
+% infinite number of answers so it is never backtracked to.
+
+% Third alternative
+middle(X, [X]).
+middle(X, [_First|Xs]) :-
+    middle(X, Middle),
+    append(Middle, [_Last], Xs).
+
+?- middle(a, X).
+X = [a] ;
+X = [_8796, a, _8808] ;
+X = [_8796, _8802, a, _8814, _8826] ;
+X = [_8796, _8802, _8808, a, _8820, _8832, _8856] .
+
+?- middle(X, [a,b,c]).
+X = b ;
+infinite loop
+
+% This one ends up in an infinite loop when trying to get the middle element and
+% the first answer (b) is not accepted. When the user asks for a new answer
+% prolog starts trying to unify Middle in append(Middle, [_Last], [b, c]) with a
+% longer and longer list which will never work.
+
+% Fourth alternative
+middle(X, [_First|Xs]) :-
+    middle(X, Middle),
+    append(Middle, [_Last], Xs).
+middle(X, [X]).
+
+?- middle(X, [a,b,c]).
+ERROR: Out of local stack
+   Exception: (1,595,448) middle(_6, _9586554) ? abort
+% Execution Aborted
+?- middle(a, X).
+ERROR: Out of local stack
+   Exception: (1,595,448) middle(a, _9586542) ? abort
+% Execution Aborted
+
+% This one gets stuck in infinite recursion in all cases because it tries to
+% find the middle of the list before finding the structure of the list.

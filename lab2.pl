@@ -32,14 +32,6 @@ partition([X|Xs], Y, Less, [X|Greater]) :-
     X >= Y,
     partition(Xs, Y, Less, Greater).
 
-% 2.2
-% middle(X, Xs)
-% X is the middle element of the list Xs
-middle(X, [X]).
-middle(X, [_First|Xs]) :-
-    append(Middle, [_Last], Xs),
-    middle(X, Middle).
-
 % 2.3
 % eval_bool(Exp, Env, Res)
 % Res is the result of evaluating the boolean expression Exp in the environment Env

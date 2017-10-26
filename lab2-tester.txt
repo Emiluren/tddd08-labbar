@@ -1,0 +1,33 @@
+% 2.1 Tests
+?- isort([1,7,4,7,3,8,3], L).
+L = [1, 3, 3, 4, 7, 7, 8]
+
+?- qsort([1,7,4,7,3,8,3], L).
+L = [1, 3, 3, 4, 7, 7, 8]
+
+% 2.3 Tests
+?- execute(set(id(y), num(2)), [y=6, x=4], Env).
+Env = [y=2, x=4] .
+
+?- execute(seq(set(id(y), num(1)),
+               seq(set(id(z), num(0)),
+                   while(id(x)>id(z),
+                         seq(set(id(z), id(z)+num(1)),
+                             set(id(y), id(y)*id(z)))))), [x=3], Res).
+Res = [z=3, y=6, x=3] .
+
+?- execute(seq(set(id(y),num(1)),
+               while(id(x) > num(1),
+                     seq(set(id(y), id(y) * id(x)),
+                         set(id(x), id(x) - num(1))))), [x=3], Res).
+Res = [y=6, x=1] .
+
+% 2.4 Tests
+?- union([1,2,3], [2,3,5], S).
+S = [1, 2, 3, 5].
+
+?- intersection([1,2,3], [2,3,5], S).
+S = [2, 3].
+
+?- powerset([1,2,3], P).
+P = [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]].

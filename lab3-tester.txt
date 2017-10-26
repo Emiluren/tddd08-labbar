@@ -1,0 +1,15 @@
+% 3.1 Tests
+?- run([x=5], `y:=1; z:=0; while x>z do z:=z+1; y:=y*z od`, Res).
+Res = [z=5, y=120, x=5]
+
+?- run([x=6], `y:=1; z:=0; while x>z do z:=z+1; y:=y*z od`, Res).
+Res = [z=6, y=720, x=6]
+
+?- run([x=4], `y:=1; z:=0; while x>z do z:=z+1; y:=y*z od`, Res).
+Res = [z=4, y=24, x=4]
+
+?- run([b=2, e=4], `y:=1; z:=0; while e>z do z:=z+1; y:=y*b od`, Res).
+Res = [z=4, y=16, b=2, e=4]
+
+?- run([b=5, e=2], `y:=1; z:=0; while e>z do z:=z+1; y:=y*b od`, Res).
+Res = [z=2, y=25, b=5, e=2]
