@@ -33,18 +33,13 @@ partition([X|Xs], Y, Less, [X|Greater]) :-
     partition(Xs, Y, Less, Greater).
 
 % 2.3
-% eval_bool(Exp, Env, Res)
-% Res is the result of evaluating the boolean expression Exp in the environment Env
-eval_bool(true, _, true).
-eval_bool(false, _, false).
-eval_bool(X > Y, Env, true) :-
+% eval_bool(Exp, Env)
+% The boolean expression Exp in the environment Env evaluates to true
+eval_bool(true, _).
+eval_bool(X > Y, Env) :-
     eval_num(X, Env, Xn),
     eval_num(Y, Env, Yn),
     Xn > Yn.
-eval_bool(X > Y, Env, false) :-
-    eval_num(X, Env, Xn),
-    eval_num(Y, Env, Yn),
-    Xn =< Yn.
 
 % eval_num(Exp, Env, V)
 % V is the result of evaluating the numeric expression Exp in the environment Env
@@ -64,39 +59,35 @@ eval_num(X * Y, Env, V) :-
     eval_num(Y, Env, Yn),
     V is Xn * Yn.
 
-% contains_id(I, Env)
-% Does the environment I contain a value for the identifier I?
-contains_id(X, [X = _|_]).
-contains_id(X, [_|Xs]) :- contains_id(X, Xs).
-
 % replace_val(I, V, Env, NewEnv)
-% if the environment Env contains a value for the identifier I then NewEnv is
-% the same environment but with the value for I replaced with V
+% If the environment Env contains a value for the identifier I then NewEnv is
+% the same environment but with the value for I replaced with V.
+% If the environment does not contain a value already then
+% the new value is appended to the end
+replace_val(I, V, [], [I = V]).
 replace_val(I, V, [I = _|Env], [I = V|Env]).
-replace_val(I, V, [E|Env], [E|NewEnv]) :- replace_val(I, V, Env, NewEnv).
+replace_val(I, V, [I_ = V_|Env], [I_ = V_|NewEnv]) :-
+    dif(I, I_),
+    replace_val(I, V, Env, NewEnv).
 
 % execute(Prog, Env, NewEnv)
 % NewEnv is the result of executing the program Prog in the environment Env
 execute(skip, Env, Env).
 execute(set(id(I), E), Env, NewEnv) :-
-    contains_id(I, Env),
     replace_val(I, V, Env, NewEnv),
     eval_num(E, Env, V).
-execute(set(id(I), E), Env, [I = V | Env]) :-
-    \+contains_id(I, Env),
-    eval_num(E, Env, V).
 execute(if(B, C, _), Env, NewEnv) :-
-    eval_bool(B, Env, true),
+    eval_bool(B, Env),
     execute(C, Env, NewEnv).
 execute(if(B, _, C), Env, NewEnv) :-
-    eval_bool(B, Env, false),
+    \+ eval_bool(B, Env),
     execute(C, Env, NewEnv).
 execute(while(B, C), Env, NewEnv) :-
-    eval_bool(B, Env, true),
+    eval_bool(B, Env),
     execute(C, Env, Env2),
     execute(while(B, C), Env2, NewEnv).
 execute(while(B, _), Env, Env) :-
-    eval_bool(B, Env, false).
+    \+ eval_bool(B, Env).
 execute(seq(C1, C2), Env, NewEnv) :-
     execute(C1, Env, Env2),
     execute(C2, Env2, NewEnv).

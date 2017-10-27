@@ -53,10 +53,36 @@ not_member(X, [Y|Xs]) :- dif(X, Y), not_member(X, Xs).
 % Initially all three cannibals and missionaries are standing on the left side
 initial_state(state(side(3, 3), side(0, 0), left)).
 
-% Exercise 4.2
-df_path(X) :- initial_state(S), df_path((S), [S], X).
+% The goal is to get everyone to the other side
+goal_state(state(side(0, 0), side(3, 3), right)).
 
-df_path(state(side(0, 0), side(3, 3), right), Visited, Visited).
+% Exercise 4.1
+% bf_path(X)
+% X is a sequence of states required to move all characters to from one side to the other
+% Found through a breadth first search
+bf_path(X) :- initial_state(S), bf_path([[S]], X).
+
+% bf_path(Queue, Path)
+% Queue is a queue of states to search to find a solution Path.
+bf_path([[Goal|Path]|_], [Goal|Path]) :- goal_state(Goal).
+bf_path([[State|Visited]|Queue], Path) :-
+    findall([State_, State|Visited],
+            (action(State, State_), not_member(State_, Visited)),
+            NewStates),
+    append(Queue, NewStates, Queue_),
+    bf_path(Queue_, Path).
+
+% Exercise 4.2
+% df_path(X)
+% X is a sequence of states required to move all characters to from one side to the other
+% Found through a depth first search
+df_path(X) :- initial_state(S), df_path(S, [S], X).
+
+% df_path(State, Visited, Path)
+% State is the current state to search,
+% Visited is a list of all the states that have been explored and
+% Path is the final solution
+df_path(Goal, Visited, Visited) :- goal_state(Goal).
 df_path(State, Visited, Path) :-
     action(State, State_),
     not_member(State_, Visited),
