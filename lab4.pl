@@ -28,19 +28,10 @@ move(side(C, M), side(C_, M_), boat(Dc, Dm)) :-
     C is C_ + Dc,
     M is M_ + Dm.
 
-% possible_state(Side1, Side2) A state has two sides (Side1, Side2) and the
-% total number of cannibals/missionaries on both sides is 3
-possible_state(side(C1, M1), side(C2, M2)) :-
-    possible_side(C1, M1),
-    possible_side(C2, M2),
-    plus(C1, C2, 3),
-    plus(M1, M2, 3).
-
 % transfer(Side1, Side2, Side1_, Side2_) Some characters are moved from side 1
 % to side 2. Side1/Side2 is the previous state of side 1/2 and Side1_/Side2_ is
 % the new state of side 1/2. The resulting sides have to be safe.
 transfer(Side1, Side2, Side1_, Side2_) :-
-    %% possible_state(Side1, Side2),
     move(Side1, Side1_, B),
     move(Side2_, Side2, B),
     safe_side(Side1_),
