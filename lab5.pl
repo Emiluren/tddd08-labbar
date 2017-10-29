@@ -23,9 +23,19 @@ tasks(Tasks, Starts, End, Workers, Cost) :-
     Workers in 0..100,
     indomain(Workers),
     Cost #= Workers * End,
-    forall(on(B1, B2), constrain_edge_times(Tasks, B1, B2)),
+    findall(B1-B2, on(B1, B2), Constraints),
+    check_constraints(Tasks, Constraints),
     cumulative(Tasks, [limit(Workers)]),
     foldl(max_end, Tasks, 0, End).
+
+% check_constraints(Ts, Bs)
+% Bs is a list of all pairs of containers (B1, B2) where B2 is on top of B1.
+% For all pairs of containers in Bs check that the top one is finished before the bottom
+% one is started.
+check_constraints(_, []).
+check_constraints(Tasks, [B1-B2|Bs]) :-
+    constrain_edge_times(Tasks, B1, B2),
+    check_constraints(Tasks, Bs).
 
 % constrain_edge_times(Tasks, B1, B2)
 % Because B1 is on top of B2 the unloading of B1 has to finish before B2 can be unloaded.
@@ -52,5 +62,15 @@ max_end(T, E0, E) :-
 % Tasks is a list of unloading tasks with the start times Starts requiring
 % Workers number of workers and costing Cost in total. Cost is as low as possible
 minimum_schedule(Tasks, Starts, End, Workers, Cost) :-
-    tasks(Tasks, Starts, End, Workers, Cost),
-    once((labeling([min(Cost)], [Cost]), label(Starts))).
+    once((
+        tasks(Tasks, Starts, End, Workers, Cost),
+        labeling([min(Cost)], [Cost]),
+        label(Starts)
+    )).
+
+% Test
+?- minimum_schedule(Tasks, Starts, End, Workers, Cost).
+Tasks = [task(1, 2, 3, 2, a), task(0, 1, 1, 4, b), task(1, 2, 3, 2, c), task(3, 1, 4, 1, d)],
+Starts = [1, 0, 1, 3],
+End = Workers, Workers = 4,
+Cost = 16.
