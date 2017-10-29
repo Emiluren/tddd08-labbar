@@ -69,8 +69,8 @@ minimum_schedule(Tasks, Starts, End, Workers, Cost) :-
     )).
 
 % Test
-?- minimum_schedule(Tasks, Starts, End, Workers, Cost).
-Tasks = [task(1, 2, 3, 2, a), task(0, 1, 1, 4, b), task(1, 2, 3, 2, c), task(3, 1, 4, 1, d)],
-Starts = [1, 0, 1, 3],
-End = Workers, Workers = 4,
-Cost = 16.
+%% ?- minimum_schedule(Tasks, Starts, End, Workers, Cost).
+%% Tasks = [task(1, 2, 3, 2, a), task(0, 1, 1, 4, b), task(1, 2, 3, 2, c), task(3, 1, 4, 1, d)],
+%% Starts = [1, 0, 1, 3],
+%% End = Workers, Workers = 4,
+%% Cost = 16.
